@@ -11,6 +11,17 @@ const COLORS = {amber:'#F5A623', teal:'#33C6B0', red:'#E5484D', blue:'#5B8DEF', 
 const BUCKET_ORDER = ['0-3','4-7','8-14','15-30','31-60','60+'];
 const BUCKET_COLORS = {'0-3':'#3FBF6F','4-7':'#33C6B0','8-14':'#5B8DEF','15-30':'#F5A623','31-60':'#EF7B45','60+':'#E5484D'};
 
+// Guarda defensiva: si Chart.js no cargó (p.ej. archivo faltante o ruta rota),
+// mostramos un mensaje claro en vez de dejar que el script truene en silencio.
+if (typeof Chart === 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    document.body.innerHTML = '<div style="padding:40px;font-family:monospace;color:#E5484D;">' +
+      'Error: no se pudo cargar Chart.js (assets/vendor/chart.umd.min.js).<br>' +
+      'Verifica que la carpeta assets/vendor/ se haya subido completa al repositorio de GitHub.</div>';
+  });
+  throw new Error('Chart.js no está disponible: revisa assets/vendor/chart.umd.min.js');
+}
+
 Chart.defaults.font.family = "'Inter', sans-serif";
 Chart.defaults.color = '#8B93A3';
 Chart.defaults.borderColor = '#272E3A';

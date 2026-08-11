@@ -10,11 +10,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- Chart.js (CDN) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-
 <!-- Estilos propios (ruta relativa) -->
 <link rel="stylesheet" href="style.css">
+
+<!-- Chart.js, incluido localmente en el proyecto (ruta relativa).
+     Se auto-hospeda en vez de apuntar a un CDN porque la versión 4.4.4
+     no existe en cdnjs (solo llega hasta 4.4.1: github.com/chartjs/Chart.js/issues/11892),
+     lo que causaba "Uncaught ReferenceError: Chart is not defined".
+     Al vendorizarlo se elimina cualquier riesgo de URL/versión rota o de
+     bloqueo de red hacia un dominio externo en GitHub Pages. -->
+<script src="assets/vendor/chart.umd.min.js"></script>
 </head>
 <body>
 

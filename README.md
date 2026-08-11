@@ -17,15 +17,21 @@ Dashboard/
 │   └── datos.json        # Los 1,656 registros del WIP (fuente de datos)
 │
 ├── assets/
-│   ├── logo.png           # (vacío — no se usó ningún logo en el diseño original)
-│   ├── fondo.jpg           # (vacío — el fondo es generado por CSS, no una imagen)
-│   ├── iconos/              # (vacío — no se usaron íconos como archivos de imagen)
-│   └── imagenes/             # (vacío — reservado por si agregas capturas o gráficos estáticos)
+│   ├── vendor/
+│   │   └── chart.umd.min.js   # Chart.js incluido localmente (ver nota abajo)
+│   ├── iconos/                # (vacío — reservado, no se usan íconos como imagen)
+│   └── imagenes/               # (vacío — reservado por si agregas capturas o gráficos estáticos)
 │
 └── README.md
 ```
 
-> **Nota:** la carpeta `assets/` se incluye por convención y para que puedas agregar tu propio logo, favicon o imágenes de marca más adelante. El diseño original no depende de ningún archivo de imagen: el fondo, los íconos de estado y las gráficas se generan con CSS y Chart.js.
+> **Nota sobre imágenes:** el diseño original no depende de ningún logo ni fondo tipo imagen — el fondo, los íconos de estado y las gráficas se generan con CSS y Chart.js. Las carpetas `iconos/` e `imagenes/` quedan vacías (con un `.gitkeep` para que Git las suba) por si más adelante agregas tu propio logo o capturas.
+
+### Por qué Chart.js está incluido localmente y no por CDN
+
+La primera versión de este proyecto cargaba Chart.js desde `cdnjs.cloudflare.com` apuntando a la versión `4.4.4`. Esa versión específica **nunca se publicó en cdnjs** (cdnjs se quedó en 4.4.1 — ver [chartjs/Chart.js#11892](https://github.com/chartjs/Chart.js/issues/11892)), así que ese `<script>` devolvía 404 en producción y el navegador nunca definía la variable global `Chart`, de ahí el error `Uncaught ReferenceError: Chart is not defined`.
+
+Para eliminar por completo ese riesgo (URLs rotas, versiones descontinuadas del CDN, bloqueos de red hacia dominios externos en la red del visitante), la librería ahora vive dentro del proyecto en `assets/vendor/chart.umd.min.js` y se carga con una ruta relativa. Es la misma librería Chart.js (MIT license), simplemente auto-hospedada — no depende de tu computadora ni de ningún servicio externo, y funciona igual en GitHub Pages.
 
 ## Cómo funciona
 
