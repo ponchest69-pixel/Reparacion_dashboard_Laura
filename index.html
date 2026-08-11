@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIP Reparación — Panel de control</title>
+<meta name="description" content="Panel de control interactivo del WIP de reparación: envejecimiento, cuellos de botella y carga por orden de trabajo.">
+
+<!-- Tipografías (CDN) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+
+<!-- Estilos propios (ruta relativa) -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand-eyebrow"><span class="dot"></span> PISO DE REPARACIÓN · WIP LIVE</div>
+    <h1>Panel de control — WIP Reparación</h1>
+    <div class="subtitle">Estado del inventario en proceso de reparación: envejecimiento, cuellos de botella por estación y carga por orden de trabajo. Corte de datos: 11 de agosto.</div>
+  </div>
+  <div class="meta-box">
+    <div>Unidades analizadas: <span class="hl" id="metaTotal">—</span></div>
+    <div>Órdenes de trabajo: <span class="hl" id="metaWO">—</span></div>
+    <div>Fuente: WIP_Agosto_11_REPARACION.xlsx</div>
+  </div>
+</header>
+
+<section class="kpi-grid">
+  <div class="kpi k-total">
+    <div class="kpi-label">Unidades en WIP</div>
+    <div class="kpi-value" id="kpiTotal">—</div>
+    <div class="kpi-sub" id="kpiTotalSub">registros válidos</div>
+  </div>
+  <div class="kpi k-avg">
+    <div class="kpi-label">Antigüedad promedio</div>
+    <div class="kpi-value" id="kpiAvg">—</div>
+    <div class="kpi-sub">días desde primer escaneo</div>
+  </div>
+  <div class="kpi k-crit">
+    <div class="kpi-label">Unidades &gt; 30 días</div>
+    <div class="kpi-value" id="kpiCrit">—</div>
+    <div class="kpi-sub" id="kpiCritSub">% del total filtrado</div>
+  </div>
+  <div class="kpi k-vcrit">
+    <div class="kpi-label">Unidades &gt; 60 días</div>
+    <div class="kpi-value" id="kpiVCrit">—</div>
+    <div class="kpi-sub">riesgo crítico de aging</div>
+  </div>
+  <div class="kpi k-wo">
+    <div class="kpi-label">Órdenes activas</div>
+    <div class="kpi-value" id="kpiWO">—</div>
+    <div class="kpi-sub">work orders con unidades abiertas</div>
+  </div>
+</section>
+
+<section class="filters">
+  <div class="filter-item">
+    <label for="fWO">Work Order</label>
+    <select id="fWO"><option value="">Todas</option></select>
+  </div>
+  <div class="filter-item">
+    <label for="fTipo">Tipo de reparación</label>
+    <select id="fTipo"><option value="">Todos</option></select>
+  </div>
+  <div class="filter-item">
+    <label for="fZone">Zona</label>
+    <select id="fZone"><option value="">Todas</option></select>
+  </div>
+  <div class="filter-item">
+    <label for="fBucket">Antigüedad</label>
+    <select id="fBucket"><option value="">Todas</option></select>
+  </div>
+  <div class="filter-item">
+    <label for="fSearch">Buscar serial</label>
+    <input type="text" id="fSearch" placeholder="GFBFLG...">
+  </div>
+  <button class="btn-reset" id="btnReset">Limpiar filtros</button>
+  <div class="filter-count">Mostrando <span id="filterCount">0</span> unidades</div>
+</section>
+
+<div class="section-title"><span class="num">01</span><h2>Distribución de antigüedad por tipo de reparación</h2><div class="line"></div></div>
+<div class="flowboard">
+  <div id="flowRows"></div>
+  <div class="flow-legend" id="flowLegend"></div>
+</div>
+
+<div class="section-title"><span class="num">02</span><h2>Cuellos de botella y volumen</h2><div class="line"></div></div>
+<div class="chart-grid">
+  <div class="panel">
+    <h3>Unidades por rango de antigüedad</h3>
+    <div class="panel-sub">Buckets de días en WIP desde el primer escaneo</div>
+    <canvas id="chartBuckets"></canvas>
+  </div>
+  <div class="panel">
+    <h3>Tipo de reparación: volumen vs. antigüedad promedio</h3>
+    <div class="panel-sub">Barras = unidades · línea = promedio de días</div>
+    <canvas id="chartTipo"></canvas>
+  </div>
+  <div class="panel">
+    <h3>Top 10 defectos</h3>
+    <div class="panel-sub">Por volumen de unidades, con antigüedad promedio</div>
+    <canvas id="chartDefect"></canvas>
+  </div>
+  <div class="panel">
+    <h3>Carga por zona</h3>
+    <div class="panel-sub">Top 10 zonas físicas por unidades en proceso</div>
+    <canvas id="chartZone"></canvas>
+  </div>
+  <div class="panel">
+    <h3>Top 10 work orders</h3>
+    <div class="panel-sub">Concentración de unidades por orden de trabajo</div>
+    <canvas id="chartWO"></canvas>
+  </div>
+  <div class="panel">
+    <h3>Unidades detenidas: última actualización vs. antigüedad total</h3>
+    <div class="panel-sub">Puntos alejados a la derecha = poco movimiento reciente pese a alta antigüedad</div>
+    <canvas id="chartScatter"></canvas>
+  </div>
+</div>
+
+<div class="section-title"><span class="num">03</span><h2>Hallazgos clave</h2><div class="line"></div></div>
+<div class="insights" id="insightsGrid"></div>
+
+<div class="section-title"><span class="num">04</span><h2>Unidades más críticas</h2><div class="line"></div></div>
+<div class="table-wrap">
+  <table id="critTable">
+    <thead>
+      <tr>
+        <th data-key="totalAging" class="sorted">Antigüedad (d)</th>
+        <th data-key="lastUpd">Últ. actualización (d)</th>
+        <th data-key="sn">Serial</th>
+        <th data-key="wo">Work Order</th>
+        <th data-key="tipo">Tipo reparación</th>
+        <th data-key="defect">Defecto</th>
+        <th data-key="loc">Ubicación</th>
+      </tr>
+    </thead>
+    <tbody id="critBody"></tbody>
+  </table>
+</div>
+
+<footer>
+  <span>Panel generado a partir de DATA (1,656 registros válidos de 1,702 filas)</span>
+  <span>Actualizar filtros no modifica el archivo original</span>
+</footer>
+
+<!-- Lógica propia (ruta relativa) -->
+<script src="script.js"></script>
+</body>
+</html>
